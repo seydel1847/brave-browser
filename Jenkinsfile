@@ -117,14 +117,14 @@ pipeline {
                                 checkout([$class: "GitSCM", branches: [[name: "${BRANCH_TO_BUILD}"]], extensions: [[$class: "WipeWorkspace"]], userRemoteConfigs: [[url: "https://github.com/brave/brave-browser.git"]]])
                             }
                         }
-                        stage("pin") {
+                        stage("pin-before") {
                             when {
                                 expression { BRANCH_EXISTS_IN_BC }
                             }
                             steps {
                                 sh """
                                     set -e
-                                    jq 'del(.config.projects["brave-core"].branch) | .config.projects["brave-core"].branch="${BRANCH_TO_BUILD}"' package.json > package.json.new
+                                    jq "del(.config.projects[\"brave-core\"].branch) | .config.projects[\"brave-core\"].branch=\"${BRANCH_TO_BUILD}\"" package.json > package.json.new
                                     mv package.json.new package.json
                                 """
                             }
@@ -141,6 +141,18 @@ pipeline {
                             }
                             steps {
                                 sh "npm run init -- --target_os=android"
+                            }
+                        }
+                        stage("pin-after") {
+                            when {
+                                expression { BRANCH_EXISTS_IN_BC }
+                            }
+                            steps {
+                                sh """
+                                    set -e
+                                    jq "del(.config.projects[\"brave-core\"].branch) | .config.projects[\"brave-core\"].branch=\"${BRANCH_TO_BUILD}\"" package.json > package.json.new
+                                    mv package.json.new package.json
+                                """
                             }
                         }
                         stage("sync") {
@@ -222,14 +234,14 @@ pipeline {
                                 checkout([$class: "GitSCM", branches: [[name: "${BRANCH_TO_BUILD}"]], extensions: [[$class: "WipeWorkspace"]], userRemoteConfigs: [[url: "https://github.com/brave/brave-browser.git"]]])
                             }
                         }
-                        stage("pin") {
+                        stage("pin-before") {
                             when {
                                 expression { BRANCH_EXISTS_IN_BC }
                             }
                             steps {
                                 sh """
                                     set -e
-                                    jq 'del(.config.projects["brave-core"].branch) | .config.projects["brave-core"].branch="${BRANCH_TO_BUILD}"' package.json > package.json.new
+                                    jq "del(.config.projects[\"brave-core\"].branch) | .config.projects[\"brave-core\"].branch=\"${BRANCH_TO_BUILD}\"" package.json > package.json.new
                                     mv package.json.new package.json
                                 """
                             }
@@ -246,6 +258,18 @@ pipeline {
                             }
                             steps {
                                 sh "npm run init"
+                            }
+                        }
+                        stage("pin-after") {
+                            when {
+                                expression { BRANCH_EXISTS_IN_BC }
+                            }
+                            steps {
+                                sh """
+                                    set -e
+                                    jq "del(.config.projects[\"brave-core\"].branch) | .config.projects[\"brave-core\"].branch=\"${BRANCH_TO_BUILD}\"" package.json > package.json.new
+                                    mv package.json.new package.json
+                                """
                             }
                         }
                         stage("sync") {
@@ -391,14 +415,14 @@ pipeline {
                                 checkout([$class: "GitSCM", branches: [[name: "${BRANCH_TO_BUILD}"]], extensions: [[$class: "WipeWorkspace"]], userRemoteConfigs: [[url: "https://github.com/brave/brave-browser.git"]]])
                             }
                         }
-                        stage("pin") {
+                        stage("pin-before") {
                             when {
                                 expression { BRANCH_EXISTS_IN_BC }
                             }
                             steps {
                                 sh """
                                     set -e
-                                    jq 'del(.config.projects["brave-core"].branch) | .config.projects["brave-core"].branch="${BRANCH_TO_BUILD}"' package.json > package.json.new
+                                    jq "del(.config.projects[\"brave-core\"].branch) | .config.projects[\"brave-core\"].branch=\"${BRANCH_TO_BUILD}\"" package.json > package.json.new
                                     mv package.json.new package.json
                                 """
                             }
@@ -416,6 +440,18 @@ pipeline {
                             }
                             steps {
                                 sh "npm run init"
+                            }
+                        }
+                        stage("pin-after") {
+                            when {
+                                expression { BRANCH_EXISTS_IN_BC }
+                            }
+                            steps {
+                                sh """
+                                    set -e
+                                    jq "del(.config.projects[\"brave-core\"].branch) | .config.projects[\"brave-core\"].branch=\"${BRANCH_TO_BUILD}\"" package.json > package.json.new
+                                    mv package.json.new package.json
+                                """
                             }
                         }
                         stage("sync") {
@@ -577,7 +613,7 @@ pipeline {
                                 checkout([$class: "GitSCM", branches: [[name: "${BRANCH_TO_BUILD}"]], extensions: [[$class: "WipeWorkspace"]], userRemoteConfigs: [[url: "https://github.com/brave/brave-browser.git"]]])
                             }
                         }
-                        stage("pin") {
+                        stage("pin-before") {
                             when {
                                 expression { BRANCH_EXISTS_IN_BC }
                             }
@@ -607,6 +643,19 @@ pipeline {
                                 powershell """
                                     \$ErrorActionPreference = "Stop"
                                     npm run init
+                                """
+                            }
+                        }
+                        stage("pin-after") {
+                            when {
+                                expression { BRANCH_EXISTS_IN_BC }
+                            }
+                            steps {
+                                powershell """
+                                    \$ErrorActionPreference = "Stop"
+                                    \$PSDefaultParameterValues['Out-File:Encoding'] = "utf8"
+                                    jq "del(.config.projects[\\`"brave-core\\`"].branch) | .config.projects[\\`"brave-core\\`"].branch=\\`"${BRANCH_TO_BUILD}\\`"" package.json > package.json.new
+                                    Move-Item -Force package.json.new package.json
                                 """
                             }
                         }
